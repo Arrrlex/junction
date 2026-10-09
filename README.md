@@ -134,3 +134,7 @@ default-browser setting to it, so changing it later means granting both again.
 - **A link opened in the right browser but you didn't see it.** It probably opened in a window
   on another Space. For Chromium profiles Junction raises the right window; for apps it can't
   identify windows in, macOS decides.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).
