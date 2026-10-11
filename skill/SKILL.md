@@ -17,7 +17,7 @@ Your job: turn that evidence into better rules, without breaking what already wo
 - `~/.config/junction/config.js`: the rules. The app reloads it on the next link; no rebuild
   needed. It may be a symlink, or live in its own git repo; check before committing.
 - `~/Library/Application Support/Junction/decisions.jsonl`: one line per link
-  (url, opener app + window title, slackWorkspace, via rule/fallback/picker, rule name, target).
+  (url, opener app + window title + Signal chat, slackWorkspace, via rule/fallback/picker, rule name, target).
 - `~/Library/Application Support/Junction/feedback.jsonl`: verdicts (`right`/`wrong`/`note`),
   `correctTarget`, `comment`, linked by `decisionId`.
 - `~/Library/Application Support/Junction/junction.log`: what the app did (URLs received,

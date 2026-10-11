@@ -3,11 +3,12 @@
 //
 // Each rule's `match` gets a context object:
 //   url            { href, protocol, host, hostname, pathname, search, hash }
-//   opener         { bundleId, name, path, windowTitle } — the app the link was clicked in
+//   opener         { bundleId, name, path, windowTitle, chat } — the app the link was clicked in
 //   slackWorkspace e.g. "Acme Corp", when the link came from Slack (needs Accessibility access)
+//   signalChat     e.g. "Book club", the open chat when the link came from Signal (ditto)
 //
 // Helpers: glob("*.example.com/*"), domain("example.com"), from("com.tinyspeck.slackmacgap"),
-// slack("Acme Corp"), any(...), all(...), not(...). A `match` can also be a glob string or an
+// slack("Acme Corp"), signal("Book club"), any(...), all(...), not(...). A `match` can also be a glob string or an
 // array of globs, matched against host + path.
 //
 // Rules are checked in order; the first match wins. `target` is a key of `targets` or

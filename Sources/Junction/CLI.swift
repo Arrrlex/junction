@@ -2,7 +2,7 @@ import Foundation
 
 /// Command-line mode, used by Claude (and you) to inspect and test routing:
 ///
-///   junction eval <url> [--from <bundleId>] [--title <window title>]
+///   junction eval <url> [--from <bundleId>] [--title <window title>] [--chat <chat name>]
 ///   junction replay [--json] [--all]
 ///   junction review [--mark]
 ///   junction recent [n]
@@ -28,7 +28,7 @@ enum CLI {
     }
 
     static let usage = """
-    junction eval <url> [--from <bundleId>] [--name <app name>] [--title <window title>]
+    junction eval <url> [--from <bundleId>] [--name <app name>] [--title <window title>] [--chat <chat name>]
         Show where the current config would send a URL.
     junction replay [--json] [--all]
         Run the current config over every logged decision and report what would change.
@@ -45,14 +45,15 @@ enum CLI {
     private static func eval(_ args: [String]) throws -> Int32 {
         var opts = Options(args)
         guard let urlString = opts.positional.first, let url = URL(string: urlString) else {
-            throw ConfigError(description: "usage: junction eval <url> [--from <bundleId>] [--title <title>]")
+            throw ConfigError(description: "usage: junction eval <url> [--from <bundleId>] [--title <title>] [--chat <chat>]")
         }
-        let opener = Opener(bundleId: opts.take("--from"), name: opts.take("--name"), windowTitle: opts.take("--title"))
+        let opener = Opener(bundleId: opts.take("--from"), name: opts.take("--name"), windowTitle: opts.take("--title"), chat: opts.take("--chat"))
         let context = RouteContext(url: url, opener: opener)
         let config = try Config()
         let result = config.route(context)
         var out: [String: Any] = ["target": result.target, "rule": result.rule ?? NSNull()]
         if let ws = context.slackWorkspace { out["slackWorkspace"] = ws }
+        if let chat = context.signalChat { out["signalChat"] = chat }
         if !result.errors.isEmpty { out["errors"] = result.errors }
         if let t = config.target(result.target) { out["label"] = t.label }
         let data = try JSONSerialization.data(withJSONObject: out, options: [.sortedKeys, .withoutEscapingSlashes])
@@ -263,7 +264,7 @@ enum CLI {
 
     private static func source(_ d: Decision) -> String {
         if let ws = d.slackWorkspace { return "from Slack · \(ws)" }
-        return "from \(d.opener.displayName)"
+        return RouteContext(url: URL(fileURLWithPath: "/"), opener: d.opener).sourceDescription
     }
 
     private static func how(_ d: Decision) -> String {
@@ -290,7 +291,7 @@ enum CLI {
 
         init(_ args: [String]) {
             var i = 0
-            let valued: Set<String> = ["--from", "--name", "--title"]
+            let valued: Set<String> = ["--from", "--name", "--title", "--chat"]
             while i < args.count {
                 let a = args[i]
                 if valued.contains(a), i + 1 < args.count {

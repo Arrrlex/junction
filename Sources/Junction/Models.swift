@@ -7,6 +7,9 @@ struct Opener: Codable, Hashable {
     var path: String?
     /// Title of the opener's focused window. Needs Accessibility access.
     var windowTitle: String?
+    /// Name of the open chat, for chat apps whose window title doesn't say (Signal).
+    /// Needs Accessibility access.
+    var chat: String?
 
     var displayName: String { name ?? bundleId ?? "unknown app" }
 }
@@ -33,9 +36,15 @@ struct RouteContext {
         return parts.last
     }
 
+    /// The Signal chat the link was clicked in, e.g. "AI Safety Berlin".
+    var signalChat: String? {
+        opener.bundleId == OpenerInfo.signalBundleId ? opener.chat : nil
+    }
+
     /// One-line description of where the link came from, for the UI.
     var sourceDescription: String {
         if let ws = slackWorkspace { return "from Slack · \(ws)" }
+        if let chat = signalChat { return "from Signal · \(chat)" }
         return "from \(opener.displayName)"
     }
 }

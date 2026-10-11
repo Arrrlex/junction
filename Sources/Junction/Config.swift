@@ -64,6 +64,10 @@ final class Config {
     function slack(...workspaces) {
       return ({ slackWorkspace }) => workspaces.includes(slackWorkspace);
     }
+    /// Match the Signal chat the link was clicked in.
+    function signal(...chats) {
+      return ({ signalChat }) => chats.includes(signalChat);
+    }
     function any(...fs) { return ctx => fs.some(f => __toFn(f)(ctx)); }
     function all(...fs) { return ctx => fs.every(f => __toFn(f)(ctx)); }
     function not(f) { return ctx => !__toFn(f)(ctx); }
@@ -173,8 +177,10 @@ final class Config {
         if let v = rc.opener.name { opener["name"] = v }
         if let v = rc.opener.path { opener["path"] = v }
         if let v = rc.opener.windowTitle { opener["windowTitle"] = v }
+        if let v = rc.opener.chat { opener["chat"] = v }
         var ctx: [String: Any] = ["url": url, "opener": opener]
         if let ws = rc.slackWorkspace { ctx["slackWorkspace"] = ws }
+        if let chat = rc.signalChat { ctx["signalChat"] = chat }
 
         let route = context.objectForKeyedSubscript("__route")!
         guard let result = route.call(withArguments: [ctx]), result.isObject else {

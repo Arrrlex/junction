@@ -104,7 +104,8 @@ junction recent [n]                                                 the last n d
 
 - macOS sends the link to Junction as an Apple Event, which includes the sender's process
   id. From that Junction gets the app, and (with Accessibility access) its focused window's
-  title.
+  title. Signal's window title is always "Signal", so for Signal Junction reads the open
+  chat's name from the conversation header inside the window instead.
 - The config is evaluated with JavaScriptCore, so rules are ordinary JS functions.
 - Chromium profiles are opened by starting a second browser process with
   `--profile-directory=…`, which hands the URL to the running browser and exits. Junction then

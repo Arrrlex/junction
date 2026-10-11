@@ -21,6 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         log("launched; accessibility=\(OpenerInfo.hasAccessibility)")
+        OpenerInfo.watchChatApps()
         applySettings()
     }
 
