@@ -39,6 +39,7 @@ struct PickerView: View {
                     ForEach(Array(model.targets.enumerated()), id: \.element.id) { i, target in
                         TargetTile(index: i, target: target, selected: i == model.selection)
                             .onTapGesture { choose(i) }
+                            .onHover { inside in if inside { model.selection = i } }
                     }
                 }
                 VStack(spacing: 2) {
