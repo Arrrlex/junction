@@ -31,35 +31,51 @@ struct PickerView: View {
     var choose: (Int) -> Void
 
     var body: some View {
-        PanelChrome(width: 420) {
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(model.context.url.host ?? model.context.url.absoluteString)
-                        .font(.headline)
-                    Text(model.context.url.absoluteString)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(2)
-                        .truncationMode(.middle)
-                    Text(model.context.sourceDescription + (model.rule.map { " · rule: \($0)" } ?? ""))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if let notice = model.notice {
-                        Text(notice).font(.caption).foregroundStyle(.orange)
-                    }
-                }
-                Divider()
-                VStack(spacing: 2) {
+        // The panel opens just below the pointer, so the icons come first and the
+        // details about the link go underneath.
+        PanelChrome(width: max(260, CGFloat(model.targets.count) * 84 + 28)) {
+            VStack(spacing: 10) {
+                HStack(spacing: 8) {
                     ForEach(Array(model.targets.enumerated()), id: \.element.id) { i, target in
-                        TargetRow(index: i, target: target, selected: i == model.selection)
+                        TargetTile(index: i, target: target, selected: i == model.selection)
                             .onTapGesture { choose(i) }
                     }
                 }
-                Text("letter to open · ↑↓ ↵ open selected · ⌘C copy URL · esc cancel")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                VStack(spacing: 2) {
+                    Text(model.context.url.absoluteString)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text(model.context.sourceDescription + (model.rule.map { " · rule: \($0)" } ?? ""))
+                    if let notice = model.notice {
+                        Text(notice).foregroundStyle(.orange)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+/// A browser in the picker: a large icon with its key letter underneath.
+struct TargetTile: View {
+    var index: Int
+    var target: Target
+    var selected: Bool
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(nsImage: Launcher.icon(for: target))
+                .resizable()
+                .frame(width: 56, height: 56)
+            Text(target.key?.uppercased() ?? "\(index + 1)")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+        }
+        .padding(6)
+        .background(selected ? Color.accentColor.opacity(0.25) : .clear, in: RoundedRectangle(cornerRadius: 10))
+        .contentShape(Rectangle())
+        .help(target.label)
     }
 }
 
@@ -95,8 +111,8 @@ enum Picker {
             switch event.keyCode {
             case Keys.escape: finish(.cancelled); return true
             case Keys.returnKey: choose(model.selection); return true
-            case Keys.up: model.selection = max(0, model.selection - 1); return true
-            case Keys.down: model.selection = min(targets.count - 1, model.selection + 1); return true
+            case Keys.left, Keys.up: model.selection = max(0, model.selection - 1); return true
+            case Keys.right, Keys.down: model.selection = min(targets.count - 1, model.selection + 1); return true
             default: break
             }
             if flags.isEmpty || flags == .shift, let i = Keys.targetIndex(event, in: targets) {

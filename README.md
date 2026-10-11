@@ -64,7 +64,7 @@ To update later: `git pull && scripts/install.sh`. Your config is never overwrit
 ## Using it
 
 **Picker** (links no rule matches): press a browser's letter (set by `key` in the config,
-default first letter of its label), or 1–9 by position, or ↑↓ ↵. ⌘C copies the URL, esc
+default first letter of its label), or 1–9 by position, or ←→ ↵. Hover an icon to see its label. ⌘C copies the URL, esc
 cancels.
 
 **Feedback** (⌃⌥⌘B by default, or menu bar icon → *Give feedback on routing…*):

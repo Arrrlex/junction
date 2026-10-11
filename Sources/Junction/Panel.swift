@@ -74,6 +74,8 @@ enum Keys {
     static let escape: UInt16 = 53
     static let up: UInt16 = 126
     static let down: UInt16 = 125
+    static let left: UInt16 = 123
+    static let right: UInt16 = 124
 
     /// 0-based index for the digit keys 1–9.
     static func digitIndex(_ event: NSEvent) -> Int? {
