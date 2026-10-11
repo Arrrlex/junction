@@ -3,8 +3,13 @@ import ApplicationServices
 
 enum OpenerInfo {
     static let signalBundleId = "org.whispersystems.signal-desktop"
-    /// CSS class of the conversation name in Signal's header (ts/components/conversation/ConversationHeader).
-    private static let signalChatClass = "module-ConversationHeader__header__info__title"
+    /// CSS classes around the conversation name in Signal's header
+    /// (ts/components/conversation/ConversationHeader). Usually the header is a button
+    /// titled with the chat name, and the inner title element doesn't show up separately.
+    private static let signalChatClasses: Set = [
+        "module-ConversationHeader__header--clickable",
+        "module-ConversationHeader__header__info__title",
+    ]
 
     /// Works out which app sent an "open URL" Apple event, and the title of its focused window.
     static func from(event: NSAppleEventDescriptor) -> Opener {
@@ -37,8 +42,12 @@ enum OpenerInfo {
         for attempt in 0..<5 {
             if attempt > 0 { Thread.sleep(forTimeInterval: 0.1) }
             guard let window = focusedWindow(pid: pid),
-                  let header = firstElement(in: window, withClass: signalChatClass) else { continue }
-            let name = staticTexts(in: header).joined().trimmingCharacters(in: .whitespacesAndNewlines)
+                  let header = firstElement(in: window, withClassIn: signalChatClasses) else { continue }
+            let title = attribute(header, kAXTitleAttribute) as? String ?? ""
+            let text = title.isEmpty ? staticTexts(in: header).joined() : title
+            // Signal wraps names in Unicode direction isolates (U+2068 … U+2069).
+            let name = text.filter { $0 != "\u{2068}" && $0 != "\u{2069}" }
+                .trimmingCharacters(in: .whitespacesAndNewlines)
             if !name.isEmpty { return name }
         }
         log("couldn't find the open chat's name in Signal's window")
@@ -82,13 +91,13 @@ enum OpenerInfo {
 
     /// Breadth-first, because the header sits much higher in the tree than the messages.
     /// Chromium exposes each element's CSS classes as AXDOMClassList.
-    private static func firstElement(in root: AXUIElement, withClass cls: String, limit: Int = 5000) -> AXUIElement? {
+    private static func firstElement(in root: AXUIElement, withClassIn classes: Set<String>, limit: Int = 5000) -> AXUIElement? {
         var queue = [root]
         var index = 0
         while index < queue.count, index < limit {
             let element = queue[index]
             index += 1
-            if (attribute(element, "AXDOMClassList") as? [String])?.contains(cls) == true { return element }
+            if let list = attribute(element, "AXDOMClassList") as? [String], !classes.isDisjoint(with: list) { return element }
             queue.append(contentsOf: children(element))
         }
         return nil
