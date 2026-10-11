@@ -112,8 +112,6 @@ enum Picker {
             switch event.keyCode {
             case Keys.escape: finish(.cancelled); return true
             case Keys.returnKey: choose(model.selection); return true
-            case Keys.left, Keys.up: model.selection = max(0, model.selection - 1); return true
-            case Keys.right, Keys.down: model.selection = min(targets.count - 1, model.selection + 1); return true
             default: break
             }
             if flags.isEmpty || flags == .shift, let i = Keys.targetIndex(event, in: targets) {
